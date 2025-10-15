@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<title>DISCOON — Coming Soon (Phonk Neon Gyro)</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg1:#050008; --bg2:#0a0016;
+    --pink:#ff00c8; --cyan:#00fff0; --mag:#9b00ff; --accent:#ffd900;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;background:radial-gradient(circle at 15% 20%, rgba(155,0,255,0.08), transparent 10%), linear-gradient(180deg,var(--bg1),var(--bg2));font-family:Orbitron,monospace;overflow:hidden;color:#fff}
+  /* wrapper */
+  .wrap{position:relative;width:100%;height:100vh;display:grid;place-items:center;perspective:1600px}
+  /* background canvas & neon layers */
+  canvas#bg{position:fixed;inset:0;width:100%;height:100%;z-index:0;display:block}
+  .neon-layer{position:fixed;inset:0;pointer-events:none;z-index:1;mix-blend-mode:screen}
+  .neon-icons{position:absolute;inset:0;overflow:hidden;transform-style:preserve-3d;filter:contrast(1.05) saturate(1.2)}
+  /* icons as background objects */
+  .bicon{position:absolute;font-size:96px;opacity:.14;filter:drop-shadow(0 10px 20px rgba(0,0,0,0.6));text-shadow:0 0 20px rgba(255,255,255,0.02);transform-origin:center;will-change:transform,opacity,filter}
+  /* make them neon — colored duplicates used for glow layers */
+  .bicon .core{display:block;mix-blend-mode:screen;filter:blur(0.6px)}
+  .bicon .glow{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:140px;opacity:.55;filter:blur(18px) saturate(1.5)}
+  /* specific positions (feel free to adjust) */
+  .camera{left:8%;top:12%;font-size:96px}
+  .palette{right:6%;top:20%;font-size:110px}
+  .play{left:6%;bottom:14%;font-size:120px}
+  .pen{right:12%;bottom:22%;font-size:88px}
+  .reel{left:50%;top:6%;font-size:100px;transform:translateX(-50%)}
+  /* center card (foreground) */
+  .card{
+    position:relative;z-index:6;min-width:320px;max-width:920px;padding:48px 56px;border-radius:18px;
+    background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    box-shadow:0 30px 80px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.02);
+    backdrop-filter: blur(8px);
+    transform-style:preserve-3d;transition:transform .25s cubic-bezier(.2,.9,.3,1);
+    text-align:center;
+  }
+  .logo{font-size:clamp(28px,6vw,58px);letter-spacing:6px;font-weight:800;color:#fff;position:relative}
+  .logo .shine{position:absolute;left:0;right:0;bottom:-8px;height:8px;filter:blur(10px);opacity:.45}
+  .tag{color:#cfcfe6;margin-top:10px;font-size:16px}
+  .cta{display:inline-block;margin-top:18px;padding:12px 28px;border-radius:999px;border:2px solid var(--pink);color:var(--pink);background:transparent;font-weight:700;letter-spacing:1px;cursor:pointer;box-shadow:0 8px 30px rgba(155,0,255,0.08)}
+  .cta:hover{background:var(--pink);color:#080008;box-shadow:0 14px 60px rgba(255,0,200,0.18)}
+  /* front neon accents behind card */
+  .halo{position:absolute;inset:0;pointer-events:none;z-index:5}
+  /* control UI */
+  .ui{position:fixed;right:16px;bottom:16px;background:rgba(0,0,0,0.36);padding:10px;border-radius:10px;z-index:20;color:#ddd;font-size:13px}
+  .ui button{margin:4px;border-radius:8px;padding:6px 8px;background:transparent;border:1px solid rgba(255,255,255,0.06);color:#fff;cursor:pointer}
+  .ui label{display:inline-flex;align-items:center;gap:6px;margin-left:8px}
+  /* small screens */
+  @media (max-width:600px){ .bicon{opacity:.12} .card{padding:28px 22px} .ui{left:12px;right:auto} }
+</style>
+</head>
+<body>
+  <canvas id="bg"></canvas>
+
+  <!-- Neon icon background (layered, behind content) -->
+  <div class="neon-layer" aria-hidden="true">
+    <div class="neon-icons" id="neonIcons">
+      <!-- each bicon contains a core glyph and large blurred glow duplicate -->
+      <div class="bicon camera" data-depth="0.18">
+        <div class="core" style="color:var(--pink)">📸</div>
+        <div class="glow" style="color:var(--pink)">📸</div>
+      </div>
+
+      <div class="bicon palette" data-depth="0.25">
+        <div class="core" style="color:var(--cyan)">🎨</div>
+        <div class="glow" style="color:var(--cyan)">🎨</div>
+      </div>
+
+      <div class="bicon play" data-depth="0.28">
+        <div class="core" style="color:var(--mag)">▶️</div>
+        <div class="glow" style="color:var(--mag)">▶️</div>
+      </div>
+
+      <div class="bicon pen" data-depth="0.22">
+        <div class="core" style="color:var(--pink)">🖊️</div>
+        <div class="glow" style="color:var(--pink)">🖊️</div>
+      </div>
+
+      <div class="bicon reel" data-depth="0.20">
+        <div class="core" style="color:var(--cyan)">🎞️</div>
+        <div class="glow" style="color:var(--cyan)">🎞️</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Foreground main content -->
+  <div class="wrap">
+    <div class="card" id="card">
+      <div class="logo" id="logoText">DISCOON
+        <div class="shine" id="logoShine" style="background:linear-gradient(90deg,var(--pink),var(--cyan));"></div>
+      </div>
+      <div class="tag">Phonk Neon — Graphic Designing & Video Editing</div>
+      <div style="height:12px"></div>
+      <button class="cta" id="ctaBtn">Stay Tuned</button>
+    </div>
+    <div class="halo" id="halo"></div>
+  </div>
+
+  <!-- UI controls -->
+  <div class="ui" id="ui">
+    <button id="permBtn">Enable Motion</button>
+    <button id="calBtn">Calibrate</button>
+    <label>Sensitivity <input id="sens" type="range" min="0.4" max="3" step="0.1" value="1"></label>
+  </div>
+
+<script>
+/* ============================
+  Advanced Gyro + Neon Parallax
+  - Device orientation permission (iOS)
+  - Low-pass smoothing (EMA)
+  - Calibration baseline
+  - Mouse fallback
+  - Layered parallax for neon icons
+  - Particle canvas influenced by motion
+============================ */
+
+(function(){
+  // elements
+  const permBtn = document.getElementById('permBtn');
+  const calBtn = document.getElementById('calBtn');
+  const sens = document.getElementById('sens');
+  const card = document.getElementById('card');
+  const halo = document.getElementById('halo');
+  const neonIcons = document.getElementById('neonIcons');
+  const bicons = Array.from(document.querySelectorAll('.bicon'));
+  const logoShine = document.getElementById('logoShine');
+  const c = document.getElementById('bg');
+  const ctx = c.getContext('2d');
+
+  // canvas resize
+  function resize(){ c.width = window.innerWidth; c.height = window.innerHeight; }
+  window.addEventListener('resize', resize); resize();
+
+  // particles (simple)
+  const particles = [];
+  const PNUM = Math.round((c.width * c.height) / 90000);
+  for(let i=0;i<PNUM;i++){
+    particles.push({
+      x: Math.random()*c.width,
+      y: Math.random()*c.height,
+      r: 0.6 + Math.random()*1.8,
+      vx: (Math.random()-0.5)*0.2,
+      vy: (Math.random()-0.5)*0.2,
+      hue: 260 + Math.random()*120
+    });
+  }
+
+  function drawParticles(forceX=0, forceY=0){
+    ctx.clearRect(0,0,c.width,c.height);
+    for(const p of particles){
+      p.vx += forceX*0.0008*(p.r*1.5);
+      p.vy += forceY*0.0008*(p.r*1.5);
+      p.x += p.vx; p.y += p.vy;
+      if(p.x < -10) p.x = c.width+10;
+      if(p.x > c.width+10) p.x = -10;
+      if(p.y < -10) p.y = c.height+10;
+      if(p.y > c.height+10) p.y = -10;
+      ctx.beginPath();
+      ctx.fillStyle = `hsla(${p.hue},80%,60%,${0.12*p.r})`;
+      ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fill();
+    }
+  }
+
+  // state & smoothing
+  const state = { x:0, y:0, z:0 }; // raw degs
+  const smooth = { x:0, y:0, z:0 }; // smoothed
+  const baseline = { x:0, y:0, z:0 };
+  let calibrated = false;
+  let lastTime = performance.now();
+
+  // EMA smoothing alpha (higher -> less smoothing)
+  function alphaForDt(dt){ // adapt alpha so smoothing is consistent across framerates
+    const rc = 120; // ms time constant (lower=snappier)
+    return 1 - Math.exp(-dt/rc);
+  }
+
+  // apply visual transforms (called on RAF)
+  function applyVisuals(){
+    const now = performance.now();
+    const dt = Math.min(40, now - lastTime);
+    lastTime = now;
+    const a = alphaForDt(dt);
+
+    // smooth with EMA
+    smooth.x += (state.x - smooth.x) * a;
+    smooth.y += (state.y - smooth.y) * a;
+    smooth.z += (state.z - smooth.z) * a;
+
+    // subtract baseline if calibrated
+    const sx = smooth.x - (calibrated? baseline.x : 0);
+    const sy = smooth.y - (calibrated? baseline.y : 0);
+    const sz = smooth.z - (calibrated? baseline.z : 0);
+
+    // sensitivity multiplier
+    const S = Number(sens.value);
+
+    // map device angles to rotation values (clamp to avoid extremes)
+    const rotY = Math.max(-35, Math.min(35, -sx * S)); // rotateY from gamma
+    const rotX = Math.max(-20, Math.min(20, sy * S * 0.9)); // rotateX from beta
+    const rotZ = Math.max(-40, Math.min(40, sz * S * 0.8)); // rotation around Z for subtle twist
+
+    // card transform (foreground)
+    card.style.transform = `translateZ(40px) rotateX(${rotX}deg) rotateY(${rotY}deg) rotateZ(${rotZ*0.03}deg)`;
+
+    // halo behind card - position slightly offset & scale with tilt
+    halo.style.background = `radial-gradient(circle at ${50 + rotY*0.8}%, rgba(255,0,200,0.08), rgba(0,255,240,0.03) 30%, transparent 60%)`;
+    halo.style.filter = `blur(${20 + Math.abs(rotX)*0.6}px)`;
+
+    // logo shine position
+    logoShine.style.transform = `translateY(${rotX*0.6}px) rotate(${rotZ*0.02}deg) scale(${1 + Math.abs(rotY)*0.005})`;
+    logoShine.style.opacity = 0.5 + Math.min(0.8, Math.abs(rotY)*0.02);
+
+    // move neon icons by their data-depth
+    bicons.forEach((el, idx) => {
+      const depth = parseFloat(el.getAttribute('data-depth') || 0.2);
+      const tx = rotY * depth * 8; // multiply for visible movement
+      const ty = rotX * depth * 6;
+      const tz = depth * 60;
+      // subtle rotation to add life
+      el.style.transform = `translate3d(${tx}px,${ty}px,${-tz}px) rotate(${rotY*depth*0.1}deg)`;
+      // glow intensity based on tilt magnitude
+      const glow = Math.min(0.9, 0.18 + (Math.abs(rotX)+Math.abs(rotY))*0.004 * (1+depth));
+      el.style.opacity = 0.12 + glow * 0.6;
+      const glowElem = el.querySelector('.glow');
+      if(glowElem) glowElem.style.opacity = 0.18 + glow*0.6;
+    });
+
+    // update particles influenced by tilt
+    drawParticles(rotY, rotX);
+
+    requestAnimationFrame(applyVisuals);
+  }
+  requestAnimationFrame(applyVisuals);
+
+  // Device orientation handler
+  function handleDO(e){
+    // gamma: left-right (-90..90) -> x
+    // beta: front-back (-180..180) -> y
+    // alpha: 0..360 -> z
+    const gamma = e.gamma ?? 0; // left-right
+    const beta = e.beta ?? 0;   // forward-back
+    const alpha = e.alpha ?? 0; // compass
+    // set raw state (scaled down a bit)
+    state.x = gamma; state.y = beta - 10; state.z = (alpha>180? alpha-360: alpha);
+  }
+
+  // mouse fallback (desktop)
+  function handleMouse(e){
+    const cx = window.innerWidth/2, cy = window.innerHeight/2;
+    const dx = (e.clientX - cx) / (cx); // -1..1
+    const dy = (e.clientY - cy) / (cy); // -1..1
+    // simulate degrees
+    state.x = dx * 30; state.y = -dy * 20; state.z = dx * 20;
+  }
+
+  // keyboard nudges for testing
+  window.addEventListener('keydown', (ev)=>{
+    if(ev.key === 'ArrowLeft') state.x -= 6;
+    if(ev.key === 'ArrowRight') state.x += 6;
+    if(ev.key === 'ArrowUp') state.y += 4;
+    if(ev.key === 'ArrowDown') state.y -= 4;
+  });
+
+  // enable listeners with graceful fallback
+  function enableListeners(){
+    if(window.DeviceOrientationEvent){
+      window.addEventListener('deviceorientation', handleDO, true);
+    }
+    window.addEventListener('mousemove', handleMouse, {passive:true});
+  }
+  enableListeners();
+
+  // Permission flow for iOS
+  async function requestPermission(){
+    if(typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function'){
+      try{
+        const resp = await DeviceMotionEvent.requestPermission();
+        if(resp === 'granted'){
+          permBtn.textContent = 'Motion Enabled';
+          permBtn.disabled = true;
+          return true;
+        } else {
+          permBtn.textContent = 'Denied';
+          return false;
+        }
+      } catch(err){
+        permBtn.textContent = 'Denied';
+        return false;
+      }
+    } else {
+      // not iOS - nothing to request
+      permBtn.style.opacity = 0.7; permBtn.disabled = true; permBtn.textContent = 'Motion Ready';
+      return true;
+    }
+  }
+
+  permBtn.addEventListener('click', () => { requestPermission(); });
+
+  // calibration
+  calBtn.addEventListener('click', ()=>{
+    baseline.x = state.x; baseline.y = state.y; baseline.z = state.z; calibrated = true;
+    calBtn.textContent = 'Calibrated';
+    setTimeout(()=> calBtn.textContent = 'Calibrate', 1300);
+  });
+
+  // helpful UX: auto prompt permission on first tap (mobile)
+  window.addEventListener('touchstart', function onFirstTouch(){
+    // one-time
+    requestPermission();
+    window.removeEventListener('touchstart', onFirstTouch);
+  }, {passive:true});
+
+  // small auto-calibration when page loads (gentle)
+  setTimeout(()=>{ baseline.x = state.x; baseline.y = state.y; baseline.z = state.z; calibrated=false; }, 800);
+
+  // animate particles initially
+  drawParticles(0,0);
+
+  // END of IIFE
+})();
+</script>
+</body>
+</html>
