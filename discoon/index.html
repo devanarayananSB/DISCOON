@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DISCOON - Coming Soon</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body, html {
+    height: 100%;
+    font-family: 'Orbitron', sans-serif;
+    background: radial-gradient(circle at top left, #0f0c29, #302b63, #24243e);
+    overflow: hidden;
+    color: #fff;
+  }
+
+  .container {
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    perspective: 1000px;
+    text-align: center;
+    padding: 20px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .card {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 60px 50px;
+    border-radius: 25px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+    transform-style: preserve-3d;
+    transition: transform 0.1s ease-out;
+    backdrop-filter: blur(10px);
+  }
+
+  h1 {
+    font-size: 4em;
+    margin-bottom: 20px;
+    letter-spacing: 5px;
+    color: rgb(255, 255, 255);
+    text-shadow:
+      0 0 5px rgb(251, 255, 0),
+      0 0 10px rgb(251, 255, 0),
+      0 0 20px  rgb(251, 255, 0),
+      0 0 40px  rgb(251, 255, 0);
+  }
+
+  p {
+    font-size: 1.5em;
+    color: #aaa;
+    margin-bottom: 30px;
+  }
+
+  .glow-button {
+    display: inline-block;
+    padding: 15px 40px;
+    font-size: 1em;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: rgb(234, 255, 0);
+    border: 2px solid rgb(195, 255, 0);
+    border-radius: 50px;
+    background: transparent;
+    cursor: pointer;
+    transition: 0.3s;
+    box-shadow: 0 0 10px rgb(241, 255, 255);
+  }
+
+  .glow-button:hover {
+    background: rgb(255, 255, 255);
+    color: #24243e;
+    box-shadow: 0 0 20px rgb(255, 236, 26), 0 0 30px rgb(238, 255, 0), 0 0 40px rgb(238, 255, 0);
+  }
+
+  /* Background floating neon particles */
+  .circle {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(0,255,255,0.05);
+    animation: float 12s infinite;
+    z-index: 0;
+  }
+
+  @keyframes float {
+    0% { transform: translateY(0) translateX(0); }
+    50% { transform: translateY(-60px) translateX(60px); }
+    100% { transform: translateY(0) translateX(0); }
+  }
+
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="card" id="card">
+    <h1>DISCOON</h1>
+    <p>Graphic Designing & Video Editing Services</p>
+    <button class="glow-button">Stay Tuned</button>
+  </div>
+</div>
+
+<!-- Background floating circles -->
+<div class="circle" style="width:100px; height:100px; top:10%; left:15%;"></div>
+<div class="circle" style="width:150px; height:150px; top:60%; left:5%;"></div>
+<div class="circle" style="width:80px; height:80px; top:50%; left:85%;"></div>
+<div class="circle" style="width:120px; height:120px; top:30%; left:70%;"></div>
+
+<script>
+  const card = document.getElementById('card');
+
+  // Mouse movement effect
+  document.addEventListener('mousemove', (e) => {
+    const x = (window.innerWidth / 2 - e.pageX) / 25;
+    const y = (window.innerHeight / 2 - e.pageY) / 25;
+    card.style.transform = `rotateY(${x}deg) rotateX(${y}deg)`;
+  });
+
+  // Gyro effect for mobile
+  window.addEventListener('deviceorientation', (e) => {
+    const x = e.gamma; // left-right tilt
+    const y = e.beta;  // front-back tilt
+    card.style.transform = `rotateY(${x}deg) rotateX(${y}deg)`;
+  });
+</script>
+
+</body>
+</html>
