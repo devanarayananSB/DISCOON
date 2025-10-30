@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discoon Project Tracker (Local)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://kit.fontawesome.com/c6c3983353.js" crossorigin="anonymous"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+        :root {
+            --discoon-blue: #3b82f6; /* Tailwind blue-500 */
+            --discoon-dark: #1f2937; /* Tailwind gray-800 */
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+        .status-tag {
+            padding: 4px 8px;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-shadow: 0 1px 1px rgba(0,0,0,0.1);
+        }
+
+        /* --- PDF PRINT STYLES --- */
+        @media print {
+            /* Hide all UI elements not relevant for the report */
+            #app > header p.text-red-600, /* Hide the "NO database" warning */
+            #save-message,             /* Hide the save message box */
+            #app > section,            /* Hide the filters and buttons section */
+            .delete-btn,               /* Hide the delete buttons */
+            th:last-child, td:last-child { /* Hide the entire Actions column */
+                display: none !important;
+            }
+
+            /* Ensure the main content takes up the whole space */
+            body, #app {
+                background-color: white !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                box-shadow: none !important;
+            }
+            
+            /* Remove shadows and non-essential backgrounds for paper */
+            header, .bg-white, .rounded-xl, .shadow-lg, .shadow {
+                background-color: white !important;
+                box-shadow: none !important;
+            }
+
+            /* Adjust table header for visibility when printing in black and white */
+            thead th {
+                -webkit-print-color-adjust: exact;
+                color-adjust: exact;
+                background-color: #e5e7eb !important; /* light gray header background */
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div id="app" class="p-4 md:p-8">
+    <header class="mb-6 md:mb-8 bg-white p-6 rounded-xl shadow-lg">
+        <h1 class="text-3xl font-extrabold text-gray-900 flex items-center mb-1">
+            <i class="fas fa-magic text-discoon-blue mr-3"></i>
+            Discoon Project Dashboard (Local)
+        </h1>
+        <p class="text-gray-500 text-sm text-red-600 font-bold">⚠️ IMPORTANT: This version has NO database. Data is temporary unless manually saved.</p>
+        <div id="save-message" class="mt-4 p-3 bg-green-100 border-l-4 border-green-500 rounded-lg text-sm text-green-800 hidden" role="alert">
+            <!-- Message will appear here on export -->
+        </div>
+    </header>
+
+    <!-- Filters and Controls -->
+    <section class="mb-6 grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div class="bg-white p-4 rounded-xl shadow">
+            <label for="status-filter" class="block text-sm font-medium text-gray-700 mb-2">Filter by Status</label>
+            <select id="status-filter" class="w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-discoon-blue focus:border-discoon-blue">
+                <option value="All">All Statuses</option>
+                <option value="Pending">Pending</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Completed">Completed</option>
+                <option value="On Hold">On Hold</option>
+            </select>
+        </div>
+
+        <div class="bg-white p-4 rounded-xl shadow">
+            <label for="payment-filter" class="block text-sm font-medium text-gray-700 mb-2">Filter by Payment</label>
+            <select id="payment-filter" class="w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-discoon-blue focus:border-discoon-blue">
+                <option value="All">All Payments</option>
+                <option value="Unpaid">Unpaid</option>
+                <option value="Partial">Partial</option>
+                <option value="Paid">Paid</option>
+                <option value="N/A">N/A (Internal)</option>
+            </select>
+        </div>
+
+        <button id="add-project-btn" class="bg-discoon-blue hover:bg-blue-600 text-white font-bold py-3 px-4 rounded-xl shadow-lg transition duration-200 flex items-center justify-center mt-6 md:mt-0">
+            <i class="fas fa-plus-circle mr-2"></i> Add New Project
+        </button>
+
+        <!-- Updated Button for PDF Export -->
+        <button id="export-data-btn" class="bg-gray-700 hover:bg-gray-800 text-white font-bold py-3 px-4 rounded-xl shadow-lg transition duration-200 flex items-center justify-center mt-6 md:mt-0">
+            <i class="fas fa-file-pdf mr-2"></i> Print/PDF Report
+        </button>
+    </section>
+
+    <!-- Project Table -->
+    <div class="bg-white rounded-xl shadow-xl overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50 sticky top-0">
+                <tr>
+                    <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[200px]">Client/Project Name</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[120px]">Deadline</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[120px]">Status</th>
+                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[120px]">Value (₹)</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[120px]">Payment Status</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Notes</th>
+                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[70px]">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="project-list" class="bg-white divide-y divide-gray-200">
+                <!-- Projects will be inserted here by JavaScript -->
+                <tr><td colspan="9" class="text-center py-8 text-gray-500">Loading projects...</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Modal for New/Edit Project (Same as before) -->
+<div id="project-modal" class="fixed inset-0 bg-gray-600 bg-opacity-75 hidden items-center justify-center p-4 z-50 transition-opacity duration-300" aria-modal="true" role="dialog">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg p-6 md:p-8 transform transition-all duration-300 scale-95">
+        <h2 id="modal-title" class="text-2xl font-bold text-gray-900 mb-4">Add New Project</h2>
+        <form id="project-form" class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Project ID (e.g., D-006)</label>
+                <input type="text" id="projectId" required class="mt-1 block w-full border-gray-300 rounded-lg shadow-sm p-2 focus:border-discoon-blue focus:ring-discoon-blue">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Client/Project Name</label>
+                <input type="text" id="clientName" required class="mt-1 block w-full border-gray-300 rounded-lg shadow-sm p-2 focus:border-discoon-blue focus:ring-discoon-blue">
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Service Type</label>
+                    <select id="serviceType" required class="mt-1 block w-full border-gray-300 rounded-lg shadow-sm p-2 focus:border-discoon-blue focus:ring-discoon-blue">
+                        <option value="Design">Design</option>
+                        <option value="Video Editing">Video Editing</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Deadline</label>
+                    <input type="date" id="deadline" required class="mt-1 block w-full border-gray-300 rounded-lg shadow-sm p-2 focus:border-discoon-blue focus:ring-discoon-blue">
+                </div>
+            </div>
+            <div class="grid grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Status</label>
+                    <select id="status" required class="mt-1 block w-full border-gray-300 rounded-lg shadow-sm p-2 focus:border-discoon-blue focus:ring-discoon-blue">
+                        <option value="Pending">Pending</option>
+                        <option value="In Progress">In Progress</option>
+                        <option value="Completed">Completed</option>
+                        <option value="On Hold">On Hold</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Value (₹)</label>
+                    <input type="number" id="projectValue" required class="mt-1 block w-full border-gray-300 rounded-lg shadow-sm p-2 focus:border-discoon-blue focus:ring-discoon-blue" value="0">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Payment Status</label>
+                    <select id="paymentStatus" required class="mt-1 block w-full border-gray-300 rounded-lg shadow-sm p-2 focus:border-discoon-blue focus:ring-discoon-blue">
+                        <option value="Unpaid">Unpaid</option>
+                        <option value="Partial">Partial</option>
+                        <option value="Paid">Paid</option>
+                        <option value="N/A">N/A</option>
+                    </select>
+                </div>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Notes</label>
+                <textarea id="notes" rows="2" class="mt-1 block w-full border-gray-300 rounded-lg shadow-sm p-2 focus:border-discoon-blue focus:ring-discoon-blue"></textarea>
+            </div>
+            <div class="flex justify-end space-x-3 pt-2">
+                <button type="button" id="close-modal-btn" class="px-4 py-2 bg-gray-200 text-gray-700 font-semibold rounded-lg hover:bg-gray-300 transition duration-150">Cancel</button>
+                <button type="submit" class="px-4 py-2 bg-discoon-blue text-white font-semibold rounded-lg hover:bg-blue-600 transition duration-150">Save Project</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal for Delete Confirmation (Same as before) -->
+<div id="delete-modal" class="fixed inset-0 bg-gray-600 bg-opacity-75 hidden items-center justify-center p-4 z-50 transition-opacity duration-300" aria-modal="true" role="dialog">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm p-6 transform transition-all duration-300 scale-95">
+        <div class="text-center">
+            <i class="fas fa-exclamation-triangle text-red-500 text-4xl mb-4"></i>
+            <h3 class="text-xl font-bold text-gray-900 mb-2">Confirm Deletion</h3>
+            <p class="text-gray-600 mb-6">Are you sure you want to delete project <span id="project-to-delete-name" class="font-semibold text-red-600"></span>? This action cannot be undone.</p>
+        </div>
+        <div class="flex justify-center space-x-4">
+            <button type="button" id="cancel-delete-btn" class="px-4 py-2 bg-gray-200 text-gray-700 font-semibold rounded-lg hover:bg-gray-300 transition duration-150">Cancel</button>
+            <button type="button" id="confirm-delete-btn" class="px-4 py-2 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition duration-150">Delete Project</button>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    // --- LOCAL DATA ARRAY ---
+    // This array holds all your project data. To save changes permanently, 
+    // export the array using the button, and then manually paste the updated 
+    // JSON back into this variable's definition in the source file.
+    let allProjects = [
+        
+       
+       
+    ];
+    let nextProjectId = 6; // Counter for new projects
+
+    // --- UI Elements ---
+    const projectListEl = document.getElementById('project-list');
+    const statusFilterEl = document.getElementById('status-filter');
+    const paymentFilterEl = document.getElementById('payment-filter');
+    const addProjectBtn = document.getElementById('add-project-btn');
+    const exportDataBtn = document.getElementById('export-data-btn');
+    const saveMessageEl = document.getElementById('save-message');
+    
+    // Modals
+    const projectModal = document.getElementById('project-modal');
+    const closeModalBtn = document.getElementById('close-modal-btn');
+    const projectForm = document.getElementById('project-form');
+    const modalTitleEl = document.getElementById('modal-title');
+    const deleteModal = document.getElementById('delete-modal');
+    const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
+    const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
+    const projectToDeleteNameEl = document.getElementById('project-to-delete-name');
+    let projectToDeleteId = null;
+
+    // --- UTILITY FUNCTIONS ---
+
+    function getStatusClass(status) {
+        switch (status) {
+            case 'Completed': return 'bg-green-100 text-green-800';
+            case 'In Progress': return 'bg-yellow-100 text-yellow-800';
+            case 'Pending':
+            case 'On Hold':
+            default: return 'bg-orange-100 text-orange-800';
+        }
+    }
+
+    function getPaymentClass(payment) {
+        switch (payment) {
+            case 'Paid': return 'bg-green-600 text-white';
+            case 'Partial': return 'bg-yellow-500 text-gray-800';
+            case 'Unpaid': return 'bg-red-600 text-white';
+            case 'N/A': default: return 'bg-gray-400 text-gray-900';
+        }
+    }
+
+    function showModal(modalElement) {
+        modalElement.classList.remove('hidden');
+        modalElement.classList.add('flex');
+    }
+
+    function hideModal(modalElement) {
+        modalElement.classList.add('hidden');
+        modalElement.classList.remove('flex');
+    }
+
+    function showTemporaryMessage(message) {
+        saveMessageEl.textContent = message;
+        saveMessageEl.classList.remove('hidden');
+        setTimeout(() => {
+            saveMessageEl.classList.add('hidden');
+        }, 5000);
+    }
+
+    // --- RENDERING AND FILTERING ---
+
+    function renderProjects() {
+        const statusFilter = statusFilterEl.value;
+        const paymentFilter = paymentFilterEl.value;
+
+        // Sort projects: incomplete projects (Pending, In Progress) first
+        const sortedProjects = allProjects.sort((a, b) => {
+            const statusOrder = ['Pending', 'In Progress', 'On Hold', 'Completed'];
+            const aStatusIndex = statusOrder.indexOf(a.status);
+            const bStatusIndex = statusOrder.indexOf(b.status);
+            if (aStatusIndex !== bStatusIndex) return aStatusIndex - bStatusIndex;
+            return new Date(a.deadline) - new Date(b.deadline); // Secondary sort by Deadline
+        });
+
+        const filteredProjects = sortedProjects.filter(project => {
+            const statusMatch = statusFilter === 'All' || project.status === statusFilter;
+            const paymentMatch = paymentFilter === 'All' || project.paymentStatus === paymentFilter;
+            return statusMatch && paymentMatch;
+        });
+
+        if (filteredProjects.length === 0) {
+            projectListEl.innerHTML = `
+                <tr><td colspan="9" class="text-center py-8 text-gray-500">
+                    No projects match the current filters.
+                </td></tr>
+            `;
+            return;
+        }
+
+        const rowsHtml = filteredProjects.map(project => {
+            const statusClass = getStatusClass(project.status);
+            const paymentClass = getPaymentClass(project.paymentStatus);
+            
+            return `
+                <tr class="hover:bg-gray-50 transition duration-150" data-id="${project.id}">
+                    <td class="px-3 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${project.projectId}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 font-semibold cursor-pointer edit-btn">${project.clientName}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${project.serviceType}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${project.deadline}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                        <span class="status-tag ${statusClass}">${project.status}</span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 text-right">₹${project.projectValue.toLocaleString('en-IN')}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                        <span class="status-tag ${paymentClass}">${project.paymentStatus}</span>
+                    </td>
+                    <td class="px-6 py-4 text-sm text-gray-500 max-w-xs truncate">${project.notes || ''}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
+                        <button class="text-red-600 hover:text-red-900 delete-btn p-1 rounded-full hover:bg-red-100" data-project-id="${project.id}" data-project-name="${project.projectId}">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+
+        projectListEl.innerHTML = rowsHtml;
+    }
+    
+    // --- EVENT HANDLERS ---
+    
+    statusFilterEl.addEventListener('change', renderProjects);
+    paymentFilterEl.addEventListener('change', renderProjects);
+
+    addProjectBtn.addEventListener('click', () => {
+        // Clear form and open modal for new project
+        projectForm.reset();
+        projectForm.dataset.projectId = '';
+        modalTitleEl.textContent = 'Add New Project';
+        showModal(projectModal);
+    });
+
+    closeModalBtn.addEventListener('click', () => {
+        hideModal(projectModal);
+    });
+
+    // Handle Delete Confirmation
+    cancelDeleteBtn.addEventListener('click', () => {
+        hideModal(deleteModal);
+        projectToDeleteId = null;
+    });
+
+    confirmDeleteBtn.addEventListener('click', () => {
+        if (projectToDeleteId) {
+            // Find index of project to delete
+            const index = allProjects.findIndex(p => p.id === projectToDeleteId);
+            if (index !== -1) {
+                allProjects.splice(index, 1); // Remove from array
+            }
+            projectToDeleteId = null;
+            hideModal(deleteModal);
+            renderProjects();
+        }
+    });
+
+    // Handle PDF/Print Export
+    exportDataBtn.addEventListener('click', () => {
+        // Trigger the browser's native print dialogue
+        window.print();
+    });
+
+
+    projectListEl.addEventListener('click', (event) => {
+        const deleteButton = event.target.closest('.delete-btn');
+        const clientNameCell = event.target.closest('.edit-btn');
+        
+        if (deleteButton) {
+            // 1. Handle Delete Button Click - Show confirmation modal
+            const id = deleteButton.dataset.projectId;
+            const name = deleteButton.dataset.projectName;
+            
+            projectToDeleteId = id;
+            projectToDeleteNameEl.textContent = name;
+            showModal(deleteModal);
+            
+        } else if (clientNameCell) {
+            // 2. Handle Edit (Client Name Cell) Click - Populate form
+            const row = event.target.closest('tr');
+            if (!row) return;
+            
+            const id = row.dataset.id;
+            const project = allProjects.find(p => p.id === id);
+            
+            if (project) {
+                // Populate form for editing
+                document.getElementById('projectId').value = project.projectId;
+                document.getElementById('clientName').value = project.clientName;
+                document.getElementById('serviceType').value = project.serviceType;
+                document.getElementById('deadline').value = project.deadline;
+                document.getElementById('status').value = project.status;
+                document.getElementById('projectValue').value = project.projectValue;
+                document.getElementById('paymentStatus').value = project.paymentStatus;
+                document.getElementById('notes').value = project.notes;
+                
+                projectForm.dataset.projectId = id;
+                modalTitleEl.textContent = `Edit Project: ${project.projectId}`;
+                showModal(projectModal);
+            }
+        }
+    });
+
+    projectForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        
+        const isEditing = !!projectForm.dataset.projectId;
+        const id = projectForm.dataset.projectId;
+        
+        const projectData = {
+            projectId: document.getElementById('projectId').value,
+            clientName: document.getElementById('clientName').value,
+            serviceType: document.getElementById('serviceType').value,
+            deadline: document.getElementById('deadline').value,
+            status: document.getElementById('status').value,
+            projectValue: parseInt(document.getElementById('projectValue').value) || 0,
+            paymentStatus: document.getElementById('paymentStatus').value,
+            notes: document.getElementById('notes').value
+        };
+
+        if (isEditing) {
+            // Find and update the existing project in the array
+            const index = allProjects.findIndex(p => p.id === id);
+            if (index !== -1) {
+                allProjects[index] = { ...allProjects[index], ...projectData };
+            }
+        } else {
+            // Add new project to the array
+            const newId = 'p' + String(nextProjectId++).padStart(3, '0');
+            allProjects.push({ id: newId, ...projectData });
+        }
+        
+        hideModal(projectModal);
+        projectForm.reset();
+        renderProjects();
+    });
+
+    // --- INITIALIZATION ---
+    window.onload = () => {
+        // Initial rendering of projects from the local array
+        renderProjects();
+        // Warn the user immediately about data persistence
+        console.warn("WARNING: This app has no backend. Data is temporary. Use 'Export Data (Copy)' to save changes permanently to the HTML source file.");
+    };
+</script>
+
+</body>
+</html>
