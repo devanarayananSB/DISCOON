@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discoon | Advanced Design Portfolio</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Use Inter font family -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+        
+        /* --- GLOBAL STYLING --- */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0d0d12; /* Deep dark background */
+            cursor: none; /* Hide default cursor for custom follower */
+            overflow-x: hidden;
+        }
+
+        .content-section {
+            min-height: 100vh; /* Ensure sections feel substantial */
+            display: flex;
+            flex-direction: column;
+            justify-content: center; /* Center content vertically */
+            position: relative;
+            padding: 8rem 1rem; /* Generous padding for content */
+        }
+        
+        /* --- ARTISTIC ELEMENTS & ANIMATIONS --- */
+        @keyframes float {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            50% { transform: translate(0, -15px) rotate(1deg); }
+            100% { transform: translate(0, 0) rotate(0deg); }
+        }
+        .animate-float {
+            animation: float 6s ease-in-out infinite;
+            filter: drop-shadow(0 0 5px rgba(0, 255, 255, 0.4));
+        }
+
+        /* --- GLOW & TEXT STYLING --- */
+        .glow-button {
+            transition: all 0.3s ease;
+            box-shadow: 0 0 5px #0ff, 0 0 10px #0ff;
+            background-color: #1a1a2e;
+            border: 1px solid #0ff;
+        }
+        .glow-button.active, .glow-button:hover {
+            background-color: #0ff;
+            color: #0d0d12;
+            text-shadow: 0 0 5px #fff;
+            box-shadow: 0 0 15px #0ff, 0 0 30px #0ff;
+            transform: scale(1.05);
+        }
+        .neon-text {
+            color: #0ff;
+            text-shadow: 0 0 7px #0ff, 0 0 10px #0ff;
+        }
+
+        .portfolio-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+        .item-image {
+            width: 100%;
+            padding-top: 75%; 
+            background-size: cover;
+            background-position: center;
+            border-top-left-radius: 0.75rem;
+            border-top-right-radius: 0.75rem;
+        }
+
+        /* --- CUSTOM CURSOR (Keep for interaction) --- */
+        #cursor-follower {
+            position: fixed;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0.8;
+            background-color: #0ff;
+            mix-blend-mode: soft-light;
+            transition: transform 0.1s ease-out, opacity 0.2s ease-out, width 0.3s ease, height 0.3s ease;
+            box-shadow: 0 0 10px #0ff, 0 0 20px #0ff, 0 0 40px rgba(0, 255, 255, 0.4);
+            transform: translate(-50%, -50%);
+        }
+        a:hover ~ #cursor-follower, button:hover ~ #cursor-follower, .portfolio-item:hover ~ #cursor-follower {
+            width: 50px;
+            height: 50px;
+            opacity: 1;
+            box-shadow: 0 0 15px #0ff, 0 0 30px #0ff, 0 0 60px rgba(0, 255, 255, 0.6);
+        }
+
+        /* --- SCROLL REVEAL ANIMATION (Slow and Smooth) --- */
+        .scroll-reveal {
+            opacity: 0;
+            transform: translateY(60px); 
+            transition: opacity 1.5s ease-out, transform 1.5s ease-out; 
+            transition-delay: 0.2s; 
+        }
+        .scroll-reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .portfolio-item {
+            opacity: 0;
+            transform: translateY(80px);
+            transition: all 1s cubic-bezier(0.25, 1, 0.5, 1);
+            background-color: #1a1a2e;
+            box-shadow: 0 4px 6px -1px rgba(0, 255, 255, 0.1), 0 2px 4px -2px rgba(0, 255, 255, 0.1);
+        }
+        .portfolio-item.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        /* Filtering classes for smooth transition */
+        .portfolio-item.hidden {
+            opacity: 0;
+            height: 0;
+            margin-bottom: 0;
+            padding-top: 0;
+            padding-bottom: 0;
+            transform: scale(0.8);
+            pointer-events: none;
+            overflow: hidden;
+            transition: opacity 0.4s ease-in-out, transform 0.4s ease-in-out, height 0.4s ease-in-out, margin 0.4s ease-in-out, padding 0.4s ease-in-out;
+        }
+
+    </style>
+</head>
+<body class="text-gray-100 antialiased">
+
+    <!-- Custom Cursor Follower Element -->
+    <div id="cursor-follower"></div>
+
+    <!-- Header & Navigation -->
+    <header class="sticky top-0 w-full z-50 bg-[#0d0d12] bg-opacity-95 backdrop-blur-sm shadow-xl shadow-cyan-500/5">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+            <h1 class="text-3xl font-extrabold neon-text tracking-wider">Discoon.</h1>
+            <nav class="hidden md:flex space-x-8">
+                <a href="#hero" class="text-gray-300 hover:text-cyan-400 transition duration-300">Home</a>
+                <a href="#about" class="text-gray-300 hover:text-cyan-400 transition duration-300">Approach</a>
+                <a href="#portfolio" class="text-gray-300 hover:text-cyan-400 transition duration-300">Work</a>
+                <a href="#contact" class="text-gray-300 hover:text-cyan-400 transition duration-300">Contact</a>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+
+        <!-- 1. HERO SECTION -->
+        <section id="hero" class="content-section">
+            <div class="max-w-7xl mx-auto text-center relative z-10">
+                <div class="scroll-reveal">
+                    <p class="text-lg text-cyan-400 mb-4 font-medium tracking-widest uppercase">Creative Strategy & Digital Artistry</p>
+                    <h2 class="text-5xl md:text-7xl font-black mb-8 leading-tight">
+                        Discoon: Where Ideas <span class="neon-text">Find Their Canvas</span>
+                    </h2>
+                    <p class="text-xl max-w-3xl mx-auto text-gray-400 mb-10">
+                        I craft immersive visual identities and interfaces using precision tools and passionate execution. Scroll down to see the work.
+                    </p>
+                    <a href="#portfolio" class="inline-block px-8 py-3 rounded-full font-semibold glow-button text-lg">
+                        Explore Creations
+                    </a>
+                </div>
+            </div>
+
+            <!-- Artistic Elements (Brushes, Pencils, Rulers) -->
+            <!-- Brush 1 -->
+            <svg class="absolute opacity-20 neon-text animate-float hidden md:block" style="top: 15%; left: 10%; width: 60px; animation-duration: 6s;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M15 4V17a3 3 0 0 0 3 3h3a1 1 0 0 0 1-1v-2l-1-1h-2a3 3 0 0 0-3-3V4zM7 21h10"/>
+            </svg>
+            <!-- Pencil/Pen -->
+            <svg class="absolute opacity-15 neon-text animate-float hidden md:block" style="bottom: 10%; right: 5%; width: 40px; animation-duration: 5s; animation-delay: 1s;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 19l7-7 3 3-7 7-3-3zM18 13l-1.5-7.5L2 15l7.5 1.5L18 13z"/>
+            </svg>
+        </section>
+
+        <!-- 2. ABOUT/APPROACH SECTION -->
+        <section id="about" class="content-section bg-[#111116]">
+            <div class="max-w-7xl mx-auto relative z-10">
+                <h3 class="text-4xl font-bold text-center mb-12 scroll-reveal">The Discoon Approach</h3>
+                <div class="grid md:grid-cols-2 gap-10 text-gray-300">
+                    <div class="scroll-reveal" style="transition-delay: 0.3s;">
+                        <h4 class="text-2xl font-semibold neon-text mb-4">The Designer's Toolkit</h4>
+                        <p class="mb-4">
+                            My methodology is rooted in **precision and passion**. Like a master craftsman, I select the right digital "tools" for every job, blending strategic analysis with bespoke visual creation. This ensures your brand doesn't just look good, but performs powerfully.
+                        </p>
+                        <p>
+                            Every project starts with a blueprint. I focus on clean UX architecture, intuitive navigation, and smooth, professional motion design to deliver an experience that feels effortless and premium.
+                        </p>
+                    </div>
+                    <div class="space-y-6 scroll-reveal" style="transition-delay: 0.5s;">
+                        <div class="p-5 rounded-xl bg-gray-800 border border-cyan-700/50 shadow-lg shadow-cyan-500/10">
+                            <p class="text-lg font-semibold neon-text">Strategy</p>
+                            <p class="text-sm">Market research, user flows, and competitor analysis to define the visual target.</p>
+                        </div>
+                        <div class="p-5 rounded-xl bg-gray-800 border border-cyan-700/50 shadow-lg shadow-cyan-500/10">
+                            <p class="text-lg font-semibold neon-text">Execution</p>
+                            <p class="text-sm">Pixel-perfect UI/UX design, custom asset creation, and front-end development support.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Artistic Elements -->
+            <!-- Ruler -->
+            <svg class="absolute opacity-15 neon-text animate-float hidden md:block" style="top: 5%; right: 20%; width: 50px; animation-duration: 7s; animation-delay: 0.5s;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                <line x1="7" y1="7" x2="17" y2="7"/>
+                <line x1="7" y1="12" x2="17" y2="12"/>
+                <line x1="7" y1="17" x2="17" y2="17"/>
+            </svg>
+            <!-- Brush 2 -->
+            <svg class="absolute opacity-15 neon-text animate-float hidden md:block" style="bottom: 20%; left: 2%; width: 70px; animation-duration: 5.5s; animation-delay: 1.5s;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 18l.7-1.3c2.4-4.8 5.6-7.5 7.3-8.8 1.4-1.1 1.4-3.1 0-4.2C19 2.5 17 2.5 15.5 3.7c-1.8 1.4-5.2 4.4-7.6 9.3L6 18c-1.3 2.6-1.3 5.4 0 8s4.7 2.6 6 0z"/>
+            </svg>
+        </section>
+
+        <!-- 3. PORTFOLIO SECTION -->
+        <section id="portfolio" class="content-section pt-20 pb-12">
+            <div class="max-w-7xl mx-auto relative z-10 flex-grow">
+                <div class="text-center mb-12 scroll-reveal">
+                    <h3 class="text-5xl font-bold mb-4">The Creative Showcase</h3>
+                    <p class="text-xl text-center text-gray-400">Filter by category to explore my diverse range of work.</p>
+                </div>
+
+                <!-- Filter Buttons -->
+                <div class="flex flex-wrap justify-center space-x-3 space-y-3 mb-12 scroll-reveal" id="filter-container" style="transition-delay: 0.3s;">
+                    <button data-category="all" class="glow-button active px-5 py-2 rounded-full font-medium transition duration-300 text-sm md:text-base mt-3 ml-3">All Works</button>
+                    <button data-category="branding" class="glow-button px-5 py-2 rounded-full font-medium transition duration-300 text-sm md:text-base">Branding & Identity</button>
+                    <button data-category="web-ui" class="glow-button px-5 py-2 rounded-full font-medium transition duration-300 text-sm md:text-base">Web & UI/UX</button>
+                    <button data-category="illustration" class="glow-button px-5 py-2 rounded-full font-medium transition duration-300 text-sm md:text-base">Digital Illustration</button>
+                    <button data-category="print-media" class="glow-button px-5 py-2 rounded-full font-medium transition duration-300 text-sm md:text-base">Print Media</button>
+                </div>
+
+                <!-- Portfolio Grid -->
+                <div class="portfolio-grid" id="portfolio-grid">
+                    <!-- Item 1: Branding -->
+                    <div class="portfolio-item rounded-xl overflow-hidden shadow-2xl shadow-cyan-500/10" data-category="branding" style="transition-delay: 0.1s;">
+                        <!-- REPLACE THE URL IN THE STYLE ATTRIBUTE BELOW WITH YOUR IMAGE LINK -->
+                        <div class="item-image" style="background-image: url('https://placehold.co/600x450/111827/0ff?text=Brand+Identity');"></div>
+                        <div class="p-6">
+                            <span class="text-xs font-medium uppercase tracking-wider text-cyan-400">Branding & Identity</span>
+                            <h4 class="mt-1 text-xl font-bold">Aura Fitness Rebrand</h4>
+                            <p class="text-gray-400 text-sm mt-2">Logo system, and style guide for a luxury gym chain.</p>
+                        </div>
+                    </div>
+                    <!-- Item 2: Web UI -->
+                    <div class="portfolio-item rounded-xl overflow-hidden shadow-2xl shadow-cyan-500/10" data-category="web-ui" style="transition-delay: 0.2s;">
+                        <!-- REPLACE THE URL IN THE STYLE ATTRIBUTE BELOW WITH YOUR IMAGE LINK -->
+                        <div class="item-image" style="background-image: url('https://placehold.co/600x450/111827/0ff?text=Dashboard+UI');"></div>
+                        <div class="p-6">
+                            <span class="text-xs font-medium uppercase tracking-wider text-cyan-400">Web & UI/UX</span>
+                            <h4 class="mt-1 text-xl font-bold">Nebula Analytics Dashboard</h4>
+                            <p class="text-gray-400 text-sm mt-2">Complex dark-mode data visualization platform.</p>
+                        </div>
+                    </div>
+                    <!-- Item 3: Illustration -->
+                    <div class="portfolio-item rounded-xl overflow-hidden shadow-2xl shadow-cyan-500/10" data-category="illustration" style="transition-delay: 0.3s;">
+                        <!-- REPLACE THE URL IN THE STYLE ATTRIBUTE BELOW WITH YOUR IMAGE LINK -->
+                        <div class="item-image" style="background-image: url('https://placehold.co/600x450/111827/0ff?text=Digital+Art');"></div>
+                        <div class="p-6">
+                            <span class="text-xs font-medium uppercase tracking-wider text-cyan-400">Digital Illustration</span>
+                            <h4 class="mt-1 text-xl font-bold">The Cosmic Voyager Series</h4>
+                            <p class="text-gray-400 text-sm mt-2">A collection of custom, stylized digital art pieces.</p>
+                        </div>
+                    </div>
+                    <!-- Item 4: Web UI -->
+                    <div class="portfolio-item rounded-xl overflow-hidden shadow-2xl shadow-cyan-500/10" data-category="web-ui" style="transition-delay: 0.4s;">
+                        <!-- REPLACE THE URL IN THE STYLE ATTRIBUTE BELOW WITH YOUR IMAGE LINK -->
+                        <div class="item-image" style="background-image: url('https://placehold.co/600x450/111827/0ff?text=Mobile+App+Design');"></div>
+                        <div class="p-6">
+                            <span class="text-xs font-medium uppercase tracking-wider text-cyan-400">Web & UI/UX</span>
+                            <h4 class="mt-1 text-xl font-bold">Ascend Mobile App</h4>
+                            <p class="text-gray-400 text-sm mt-2">UI/UX design for a minimalist goal-tracking app.</p>
+                        </div>
+                    </div>
+                    <!-- Item 5: Print Media -->
+                    <div class="portfolio-item rounded-xl overflow-hidden shadow-2xl shadow-cyan-500/10" data-category="print-media" style="transition-delay: 0.5s;">
+                        <!-- REPLACE THE URL IN THE STYLE ATTRIBUTE BELOW WITH YOUR IMAGE LINK -->
+                        <div class="item-image" style="background-image: url('https://placehold.co/600x450/111827/0ff?text=Brochure+Design');"></div>
+                        <div class="p-6">
+                            <span class="text-xs font-medium uppercase tracking-wider text-cyan-400">Print Media</span>
+                            <h4 class="mt-1 text-xl font-bold">Annual Report Layout</h4>
+                            <p class="text-gray-400 text-sm mt-2">A clean, professional 20-page print layout.</p>
+                        </div>
+                    </div>
+                    <!-- Item 6: Branding -->
+                    <div class="portfolio-item rounded-xl overflow-hidden shadow-2xl shadow-cyan-500/10" data-category="branding" style="transition-delay: 0.6s;">
+                        <!-- REPLACE THE URL IN THE STYLE ATTRIBUTE BELOW WITH YOUR IMAGE LINK -->
+                        <div class="item-image" style="background-image: url('https://placehold.co/600x450/111827/0ff?text=Logo+Design');"></div>
+                        <div class="p-6">
+                            <span class="text-xs font-medium uppercase tracking-wider text-cyan-400">Branding & Identity</span>
+                            <h4 class="mt-1 text-xl font-bold">Zenith Energy Logo</h4>
+                            <p class="text-gray-400 text-sm mt-2">A powerful and modern logo design for a startup.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Artistic Element -->
+            <!-- Color Dropper -->
+            <svg class="absolute opacity-20 neon-text animate-float hidden md:block" style="top: 10%; right: 10%; width: 50px; animation-duration: 4s; animation-delay: 0.2s;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 13.5V10l7.5-7.5-4-4L10 10h-3l-7.5-7.5L3.5 6 11 13.5v3"/>
+            </svg>
+        </section>
+
+        <!-- 4. CONTACT SECTION (Includes Footer) -->
+        <footer id="contact" class="content-section bg-[#111116] py-12 md:py-16 mt-0 border-t border-cyan-800/30">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+                <div class="scroll-reveal">
+                    <h3 class="text-4xl font-bold mb-4">Let's Create Together</h3>
+                    <p class="text-lg text-gray-400 max-w-2xl mx-auto mb-8">
+                        The tools are ready, the canvas is open. Get in touch to discuss your next breakthrough project with Discoon.
+                    </p>
+                    <div class="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-6 mb-10">
+                        <div class="p-4 rounded-lg bg-gray-800 border border-cyan-700/50">
+                            <p class="font-semibold neon-text">Email:</p>
+                            <p>hello@discoon-designs.com</p>
+                        </div>
+                        <div class="p-4 rounded-lg bg-gray-800 border border-cyan-700/50">
+                            <p class="font-semibold neon-text">Phone:</p>
+                            <p>+1 (555) 123-4567</p>
+                        </div>
+                    </div>
+                    <p class="text-sm text-gray-500 mt-12">&copy; 2024 Discoon Designs. Artistic rights reserved.</p>
+                </div>
+            </div>
+
+            <!-- Artistic Element -->
+            <!-- Pen Tool -->
+            <svg class="absolute opacity-15 neon-text animate-float hidden md:block" style="bottom: 15%; left: 15%; width: 60px; animation-duration: 6.5s;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 20l7-7 3 3-7 7-3-3zM18 13l-1.5-7.5L2 15l7.5 1.5L18 13z"/>
+            </svg>
+        </footer>
+
+    </main>
+
+    <script>
+        // --- CUSTOM CURSOR LOGIC ---
+        const cursorFollower = document.getElementById('cursor-follower');
+        let posX = 0, posY = 0;
+        let mouseX = 0, mouseY = 0;
+        const ease = 0.15; 
+
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+        });
+
+        document.addEventListener('touchmove', (e) => {
+            if (e.touches.length > 0) {
+                mouseX = e.touches[0].clientX;
+                mouseY = e.touches[0].clientY;
+            }
+        });
+
+        function animateCursor() {
+            const dx = mouseX - posX;
+            const dy = mouseY - posY;
+            posX += dx * ease;
+            posY += dy * ease;
+            cursorFollower.style.transform = `translate(${posX}px, ${posY}px) translate(-50%, -50%)`;
+            requestAnimationFrame(animateCursor);
+        }
+
+        // Only enable custom cursor for non-touch devices
+        if (!('ontouchstart' in window || navigator.maxTouchPoints > 0)) {
+            animateCursor();
+        } else {
+             document.body.style.cursor = 'default';
+             cursorFollower.style.display = 'none';
+        }
+
+
+        // --- PORTFOLIO FILTERING LOGIC ---
+        const filterContainer = document.getElementById('filter-container');
+        const portfolioItems = document.querySelectorAll('.portfolio-item');
+        
+        function filterPortfolio(category) {
+            requestAnimationFrame(() => {
+                portfolioItems.forEach(item => {
+                    const itemCategory = item.getAttribute('data-category');
+
+                    if (category === 'all' || itemCategory === category) {
+                        item.classList.remove('hidden');
+                        setTimeout(() => item.style.display = 'block', 10);
+                        item.classList.add('visible');
+                    } else {
+                        item.classList.add('hidden');
+                        item.classList.remove('visible');
+                        // Hide after transition
+                        setTimeout(() => item.style.display = 'none', 400); 
+                    }
+                });
+            });
+        }
+
+        filterContainer.addEventListener('click', (event) => {
+            const button = event.target.closest('.glow-button');
+            if (!button) return;
+
+            const category = button.getAttribute('data-category');
+            
+            document.querySelectorAll('.glow-button').forEach(btn => btn.classList.remove('active'));
+            button.classList.add('active');
+            
+            filterPortfolio(category);
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            filterPortfolio('all');
+        });
+
+
+        // --- INTERSECTION OBSERVER SCROLL ANIMATION LOGIC ---
+        const observerOptions = {
+            root: null,
+            rootMargin: '0px',
+            threshold: 0.1 
+        };
+
+        function handleIntersection(entries, observer) {
+            entries.forEach(entry => {
+                // If element is in view
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    // Stop observing once visible
+                    observer.unobserve(entry.target); 
+                }
+            });
+        }
+
+        const observer = new IntersectionObserver(handleIntersection, observerOptions);
+
+        // Apply observer to all scroll-reveal elements
+        document.querySelectorAll('.scroll-reveal, .portfolio-item').forEach(element => {
+            observer.observe(element);
+        });
+    </script>
+
+</body>
+</html>
