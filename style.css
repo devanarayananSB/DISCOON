@@ -10,7 +10,7 @@
 }
 
 /* =========================
-   Design System
+   Design System  
 ========================= */
 :root {
   /* Light theme */
@@ -634,4 +634,5 @@ section h2 {
 .work-item {
   background-size: cover;
   background-position: center;
+
 }
