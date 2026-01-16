@@ -1,0 +1,637 @@
+/* =========================
+   Reset
+========================= */
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* =========================
+   Design System
+========================= */
+:root {
+  /* Light theme */
+  --bg: #f5f5f7;
+  --surface: #ffffff;
+  --text: #111111;
+  --muted: #6b6b6b;
+  --border: rgba(0, 0, 0, 0.08);
+  --accent: #9d00ff;
+
+  /* Type scale */
+  --h1: clamp(2.6rem, 5vw, 3.6rem);
+  --h2: 1.8rem;
+  --h3: 1.1rem;
+  --body: 0.95rem;
+
+  /* Spacing */
+  --space-xs: 0.5rem;
+  --space-sm: 1rem;
+  --space-md: 2rem;
+  --space-lg: 4rem;
+  --space-xl: 7rem;
+
+  --transition: 0.25s ease;
+  
+}
+
+/* =========================
+   Dark Theme
+========================= */
+body.dark {
+  --bg: #0b0b0b;
+  --surface: #141414;
+  --text: #f5f5f5;
+  --muted: rgba(255, 255, 255, 0.6);
+  --border: rgba(255, 255, 255, 0.12);
+  --accent: #9d00ff;
+}
+
+/* =========================
+   Base
+========================= */
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Inter",
+    "Helvetica Neue", Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+ 
+}
+
+h1, h2, h3, h4 {
+  font-feature-settings: "liga", "kern";
+  color: var(--text);
+}
+
+p {
+  font-size: var(--body);
+  color: var(--muted);
+  max-width: 60ch;
+}
+
+/* =========================
+   Utilities
+========================= */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.25rem;
+}
+
+/* =========================
+   Navbar
+========================= */
+.navbar {
+  position: sticky;
+  top: 0;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  z-index: 10;
+}
+
+.nav-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 68px;
+}
+
+.logo {
+  font-weight: 700;
+  font-size: 1rem;
+  letter-spacing: -0.03em;
+}
+
+/* Nav links */
+nav {
+  display: flex;
+  align-items: center;
+  gap: 1.75rem;
+}
+
+nav a {
+  position: relative;
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text);
+  opacity: 0.8;
+  padding: 4px 0;
+  transition: opacity var(--transition);
+}
+
+nav a:hover {
+  opacity: 1;
+}
+
+nav a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -6px;
+  width: 100%;
+  height: 2px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.3s ease;
+}
+
+nav a:hover::after,
+nav a.active::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+/* =========================
+   Theme Toggle
+========================= */
+.theme-toggle {
+  position: relative;
+  background: none;
+  border: none;
+  cursor: pointer;
+  margin-left: 1.5rem;
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  color: var(--text);
+  opacity: 0.85;
+  transition: opacity var(--transition), background var(--transition), transform var(--transition);
+}
+
+.theme-toggle:hover {
+  opacity: 1;
+  background: var(--border);
+  border-radius: 50%;
+  transform: rotate(8deg);
+}
+
+/* ICON BASE */
+.theme-toggle .icon {
+  position: absolute;
+  font-size: 1rem;
+  line-height: 1;
+color: var(--text);        /* ← THIS LINE */
+  fill: currentColor;       /* ← THIS LINE */
+  stroke: currentColor; 
+
+  transition:
+    opacity 0.35s ease,
+    transform 0.35s ease;
+}
+
+/* LIGHT MODE (default) */
+.theme-toggle .sun {
+  opacity: 1;
+  transform: scale(1) rotate(0);
+}
+
+.theme-toggle .moon {
+  opacity: 0;
+  transform: scale(0.6) rotate(-25deg);
+}
+
+/* DARK MODE */
+body.dark .theme-toggle .sun {
+  opacity: 0;
+  transform: scale(0.6) rotate(25deg);
+}
+
+body.dark .theme-toggle .moon {
+  opacity: 1;
+  transform: scale(1) rotate(0);
+}
+
+
+/* =========================
+   Hero
+========================= */
+.hero {
+  padding-top: clamp(6rem, 12vh, 9rem);
+  padding-bottom: clamp(5rem, 10vh, 7rem);
+}
+
+.hero-inner {
+  max-width: 720px;
+}
+
+.hero h1 {
+  font-size: var(--h1);
+  line-height: 1.15;
+  letter-spacing: -0.04em;
+  margin-bottom: var(--space-md);
+  max-width: 14ch;
+}
+
+.hero p {
+  font-size: 1rem;
+  margin-bottom: var(--space-lg);
+}
+
+/* =========================
+   Button
+========================= */
+.btn-primary {
+  position: relative;
+  display: inline-block;
+  padding: 0.85rem 1.6rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  border: 1.5px solid var(--accent);
+  color: var(--accent);
+  text-decoration: none;
+  overflow: hidden;
+}
+
+.btn-primary::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--transition);
+  z-index: -1;
+}
+
+.btn-primary:hover::after {
+  transform: scaleX(1);
+}
+
+.btn-primary:hover {
+  color: #fff;
+}
+
+/* =========================
+   Sections
+========================= */
+section {
+  padding: var(--space-lg) 0;
+  scroll-margin-top: 80px;
+}
+
+section h2 {
+  font-size: var(--h2);
+  letter-spacing: -0.02em;
+  margin-bottom: var(--space-md);
+  max-width: 20ch;
+}
+
+/* =========================
+   Work
+========================= */
+.work {
+  position: relative;
+}
+
+.work-item {
+  min-width: 260px;
+  aspect-ratio: 1 / 1;
+  background: var(--surface);
+  border-radius: 16px;
+  overflow: hidden;
+  flex-shrink: 0;
+  transition: transform 0.35s ease, box-shadow 0.35s ease;
+}
+
+.work-item:hover {
+  transform: scale(1.06);
+  box-shadow: 0 18px 40px rgba(0,0,0,0.25);
+}
+
+.work-overlay {
+  position: absolute;
+  inset: 0;
+  background: var(--accent);
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  opacity: 0;
+  transition: opacity var(--transition);
+  text-align: center;
+}
+
+.work-item:hover .work-overlay {
+  opacity: 1;
+}
+
+/* Tighten Selected Work section only */
+.work .container {
+  max-width: 900px;
+}
+
+.work-swiper {
+  width: 100%;
+  overflow: hidden;
+  padding: 1rem 0 2rem;
+}
+
+.work-swiper .swiper-slide {
+  width: 240px;
+}
+
+
+
+/* =========================
+   Services
+========================= */
+.services-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: clamp(1.25rem, 2vw, 2rem);
+}
+
+.service {
+  background: var(--surface);
+  padding: clamp(1.5rem, 2vw, 2rem);
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  transition: transform 0.35s ease, box-shadow 0.35s ease;
+}
+
+.service:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+
+}
+
+.service h3 {
+  font-size: var(--h3);
+  margin-bottom: var(--space-xs);
+}
+
+.service p {
+  color: var(--muted);
+}
+
+.service {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Accent line */
+.service::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 3px;
+  width: 100%;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.35s ease;
+}
+
+/* Hover trigger */
+.service:hover::before {
+  transform: scaleX(1);
+}
+
+
+/* =========================
+   Why
+========================= */
+.why-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--space-md);
+}
+
+.why-item h4 {
+  font-size: 1rem;
+  margin-bottom: var(--space-xs);
+}
+
+.why-item p {
+  max-width: 45ch;
+}
+
+
+
+/* =========================
+   Footer
+========================= */
+.footer {
+  border-top: 1px solid var(--border);
+  padding: var(--space-md) 0;
+}
+
+.footer a {
+  color: var(--text);
+  text-decoration: none;
+}
+
+.footer a:hover {
+  color: var(--accent);
+}
+
+/* =========================
+   Contact (FIXED & ALIGNED)
+========================= */
+
+/* Section wrapper */
+.contact {
+  position: relative;
+  padding: var(--space-xl) 0;
+  overflow: hidden; /* CLIPS glow */
+}
+
+/* SAME width discipline as other sections */
+.contact .container {
+  max-width: 900px;
+}
+
+/* Background glow */
+.contact::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(
+      600px circle at 20% 30%,
+      color-mix(in srgb, var(--accent) 18%, transparent),
+      transparent 60%
+    );
+  pointer-events: none;
+}
+
+/* Grid */
+.contact-wrap {
+  position: relative;
+  display: grid;
+  gap: var(--space-lg);
+  width: 100%;
+}
+
+/* Desktop alignment */
+@media (min-width: 768px) {
+  .contact-wrap {
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+  }
+}
+
+/* Left content */
+.contact-left h2 {
+  font-size: var(--h2);
+  max-width: 18ch;
+  letter-spacing: -0.02em;
+  margin-bottom: var(--space-sm);
+}
+
+.contact-left p {
+  max-width: 42ch;
+}
+
+/* Form (LOCK WIDTH) */
+.contact-form {
+  position: relative;
+  max-width: 420px;      /* KEY FIX */
+  width: 100%;
+  justify-self: end;     /* Aligns form cleanly */
+  background: color-mix(in srgb, var(--surface) 85%, transparent);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: clamp(2rem, 4vw, 2.5rem);
+  display: grid;
+  gap: 1.75rem;
+  backdrop-filter: blur(14px);
+  box-shadow: 0 30px 60px rgba(0,0,0,0.12);
+}
+
+/* Fields */
+.field {
+  position: relative;
+}
+
+.field input,
+.field textarea {
+  width: 100%;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  padding: 0.75rem 0;
+  font-size: 0.95rem;
+  color: var(--text);
+  resize: none;
+}
+
+/* Labels */
+.field label {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.85rem;
+  color: var(--muted);
+  pointer-events: none;
+  transition: transform 0.25s ease, font-size 0.25s ease, color 0.25s ease;
+}
+
+.field textarea + label {
+  top: 1rem;
+  transform: none;
+}
+
+/* Accent line */
+.field .line {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 2px;
+  width: 100%;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.35s ease;
+}
+
+.field input:focus + label,
+.field input:not(:placeholder-shown) + label,
+.field textarea:focus + label,
+.field textarea:not(:placeholder-shown) + label {
+  transform: translateY(-140%);
+  font-size: 0.7rem;
+  color: var(--accent);
+}
+
+.field input:focus ~ .line,
+.field textarea:focus ~ .line {
+  transform: scaleX(1);
+}
+
+.field input:focus,
+.field textarea:focus {
+  outline: none;
+}
+
+/* Button */
+.contact-btn {
+  margin-top: 0.5rem;
+  align-self: flex-start;
+}
+
+/* =========================
+   Contact Social Icons
+========================= */
+.contact-socials {
+  display: flex;
+  gap: 0.6rem;
+  margin-top: 0.75rem; /* 🔥 tight & intentional */
+}
+
+
+.contact-socials a {
+   width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--border);
+  color: var(--text);
+  transition:
+    background var(--transition),
+    color var(--transition),
+    transform var(--transition),
+    box-shadow var(--transition);
+}
+
+.contact-socials a svg {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+}
+
+/* Hover effect */
+.contact-socials a:hover {
+  background: var(--accent);
+  color: #fff;
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px color-mix(in srgb, var(--accent) 35%, transparent);
+}
+
+
+
+@media (min-width: 768px) {
+  .contact-wrap {
+    grid-template-columns: 1fr 1.1fr;
+    align-items: center;
+  }
+}
+
+.work-item {
+  background-size: cover;
+  background-position: center;
+}
